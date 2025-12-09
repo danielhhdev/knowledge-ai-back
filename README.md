@@ -4,7 +4,7 @@
 
 ## 🎯 ¿Qué es este proyecto?
 
-DevKnowledge RAG es un sistema completo de **Retrieval-Augmented Generation** construido con tecnologías modernas. Más que un proyecto funcional, es un **laboratorio de aprendizaje** donde dominar:
+Knowledge IA es un sistema completo de **Retrieval-Augmented Generation** construido con tecnologías modernas. Más que un proyecto funcional, es un **laboratorio de aprendizaje** donde dominar:
 
 - **Arquitectura RAG de principio a fin**: desde la ingesta de documentos hasta la generación de respuestas contextualizadas
 - **Spring AI**: framework nativo para integrar LLMs en aplicaciones Spring Boot

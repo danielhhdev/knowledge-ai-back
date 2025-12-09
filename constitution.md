@@ -54,7 +54,7 @@ Establecer reglas de uso de la IA en este repositorio para maximizar productivid
 - Clases y records: `PascalCase` descriptivo (`QueryService`, `DocumentMapper`).
 - Metodos y variables: `lowerCamelCase` claros, sin abreviaturas cripticas (`chunkSize`, `buildPrompt`).
 - Constantes: `UPPER_SNAKE_CASE` (`DEFAULT_MAX_RESULTS`).
-- Paquetes: minusculas y concisos (`com.devknowledge.rag.service.impl`).
+- Paquetes: minusculas y concisos (`com.ia.knowledge.service.impl`).
 - DTOs y mappers: sufijos coherentes (`IngestRequest`, `IngestResponse`, `DocumentMapper`).
 - Tests: sufijo `Test` (`QueryServiceImplTest`) y metodos descriptivos (`shouldReturnSourcesWhenContextFound`).
 

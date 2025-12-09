@@ -1,6 +1,6 @@
 # AGENTS.md - Arquitectura en Capas
 
-> Lineamientos arquitectónicos para el desarrollo del sistema DevKnowledge RAG
+> Lineamientos arquitectónicos para el desarrollo del sistema Knowledge RAG
 
 ---
 
@@ -18,7 +18,7 @@
 
 ## 🎯 Propósito
 
-Este documento define la arquitectura en capas del sistema **DevKnowledge RAG**, un sistema de Retrieval-Augmented Generation construido con:
+Este documento define la arquitectura en capas del sistema **Knowledge RAG**, un sistema de Retrieval-Augmented Generation construido con:
 
 - **Spring Boot 3.4** + **Java 21**
 - **Spring AI** para integración con LLMs

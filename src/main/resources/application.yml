@@ -1,6 +1,6 @@
 spring:
   application:
-    name: knowledgeAI
+    name: knowledge-ai
   profiles:
     active: dev
   datasource:

@@ -4,7 +4,7 @@
 Preparar el entorno local y el esqueleto tecnico minimo: proyecto Spring Boot 3.4/Java 21 con capas definidas, perfil `dev`, Docker Compose para PostgreSQL+PgVector, Ollama instalado de forma nativa (no en contenedor), endpoint `/api/health` funcional y pruebas basicas.
 
 ## 2. Arquitectura Afectada
-- Paquetes backend: `com.devknowledge.rag.config`, `controller`/`controller.impl`, `service`/`service.impl`, `dto.response` para health, estructura vacia para demas capas (`domain`, `repository`, `mapper`, `dto.request`).
+- Paquetes backend: `com.ia.knowledge.config`, `controller`/`controller.impl`, `service`/`service.impl`, `dto.response` para health, estructura vacia para demas capas (`domain`, `repository`, `mapper`, `dto.request`).
 - Endpoints: `GET /api/health` expuesto desde `HealthController`/`HealthControllerImpl`.
 - Configuracion: `application.yml` y `application-dev.yml` con datasource, perfiles y propiedades de Ollama apuntando a host local; `OpenAPIConfig` si aplica el esqueleto; `SpringAIConfig`/`OllamaConfig` placeholders.
 - Infra: `docker-compose.yml` para PostgreSQL 16 con PgVector y red local; scripts/env de arranque (sin Ollama en contenedor).
