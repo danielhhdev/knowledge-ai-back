@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.ia.knowledgeai.domain.support.TextChunker;
+
 class TextChunkerTest {
 
 	private final TextChunker textChunker = new TextChunker();

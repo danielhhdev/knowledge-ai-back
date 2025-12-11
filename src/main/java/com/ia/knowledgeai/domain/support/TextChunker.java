@@ -1,4 +1,4 @@
-package com.ia.knowledgeai.service;
+package com.ia.knowledgeai.domain.support;
 
 import java.util.ArrayList;
 import java.util.List;

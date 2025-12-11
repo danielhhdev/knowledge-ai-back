@@ -16,15 +16,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.web.client.RestClient;
+import org.springframework.mock.web.MockMultipartFile;
 
 import com.ia.knowledgeai.config.IngestProperties;
 import com.ia.knowledgeai.domain.Document;
+import com.ia.knowledgeai.domain.ParsedDocument;
 import com.ia.knowledgeai.dto.request.IngestRequest;
 import com.ia.knowledgeai.dto.response.IngestResponse;
+import com.ia.knowledgeai.domain.support.DocumentParser;
 import com.ia.knowledgeai.repository.DocumentRepository;
 import com.ia.knowledgeai.repository.VectorStoreRepository;
-import com.ia.knowledgeai.service.TextChunker;
+import com.ia.knowledgeai.domain.support.TextChunker;
 
 @ExtendWith(MockitoExtension.class)
 class IngestServiceImplTest {
@@ -38,6 +40,9 @@ class IngestServiceImplTest {
 	@Mock
 	private VectorStore vectorStore;
 
+	@Mock
+	private DocumentParser documentParser;
+
 	private TextChunker textChunker = new TextChunker();
 
 	private IngestServiceImpl ingestService;
@@ -49,18 +54,20 @@ class IngestServiceImplTest {
 		properties.setChunkOverlap(2);
 		properties.setMaxTextLength(5000);
 
-		RestClient restClient = RestClient.builder().build();
 		ingestService = new IngestServiceImpl(documentRepository, vectorStoreRepository, vectorStore, textChunker,
-				properties, restClient);
+				documentParser, properties);
 	}
 
 	@Test
-	void shouldIngestTextContent() {
+	void shouldIngestFileContent() {
 		UUID documentId = UUID.randomUUID();
 		when(documentRepository.save(any()))
 				.thenReturn(new Document(documentId, "source", "title", List.of("tag"), Instant.now()));
+		when(documentParser.parse(any(), any(), any()))
+				.thenReturn(new ParsedDocument("sample text content", "application/pdf"));
 
-		IngestRequest request = new IngestRequest("source", "title", List.of("tag1"), "sample text content", null);
+		MockMultipartFile file = new MockMultipartFile("file", "sample.pdf", "application/pdf", "pdf-content".getBytes());
+		IngestRequest request = new IngestRequest("source", "title", List.of("tag1"), file);
 		IngestResponse response = ingestService.ingest(request);
 
 		assertThat(response.documentId()).isEqualTo(documentId);
@@ -72,10 +79,10 @@ class IngestServiceImplTest {
 
 	@Test
 	void shouldFailWhenNoContent() {
-		IngestRequest request = new IngestRequest("source", "title", List.of(), null, null);
+		IngestRequest request = new IngestRequest("source", "title", List.of(), null);
 
 		assertThatThrownBy(() -> ingestService.ingest(request))
 				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessageContaining("Either text or url must be provided");
+				.hasMessageContaining("file must be provided for ingestion");
 	}
 }

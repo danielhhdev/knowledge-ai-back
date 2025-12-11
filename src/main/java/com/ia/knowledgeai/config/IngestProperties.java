@@ -11,6 +11,12 @@ public class IngestProperties {
 
 	private int maxTextLength = 20000;
 
+	private long maxFileSizeBytes = 10 * 1024 * 1024;
+
+	private java.util.List<String> allowedContentTypes = java.util.List.of(
+			"application/pdf",
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+
 	public int getChunkSize() {
 		return chunkSize;
 	}
@@ -33,5 +39,24 @@ public class IngestProperties {
 
 	public void setMaxTextLength(int maxTextLength) {
 		this.maxTextLength = maxTextLength;
+	}
+
+	public long getMaxFileSizeBytes() {
+		return maxFileSizeBytes;
+	}
+
+	public void setMaxFileSizeBytes(long maxFileSizeBytes) {
+		this.maxFileSizeBytes = maxFileSizeBytes;
+	}
+
+	public java.util.List<String> getAllowedContentTypes() {
+		return allowedContentTypes;
+	}
+
+	public void setAllowedContentTypes(java.util.List<String> allowedContentTypes) {
+		if (allowedContentTypes == null) {
+			return;
+		}
+		this.allowedContentTypes = allowedContentTypes;
 	}
 }

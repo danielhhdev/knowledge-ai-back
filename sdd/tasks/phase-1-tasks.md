@@ -8,6 +8,7 @@
 | 4 | Integrar cliente de embeddings con Spring AI/Ollama |
 | 5 | Implementar servicio de ingesta y persistencia atomica |
 | 6 | Probar endpoint y servicio de ingesta |
+| 7 | Ingestar solo ficheros (PDF/DOCX) con Apache Tika |
 
 ---
 
@@ -166,3 +167,32 @@ Asegurar calidad mediante pruebas unitarias y de integracion del endpoint de ing
 
 ## 5. Notas tecnicas
 - Usar perfiles de test y datos efimeros; evitar dependencias reales de Ollama en tests unitarios.
+
+---
+
+# TASK 7 - Ingestar solo ficheros (PDF/DOCX) con Apache Tika
+
+## 1. Objetivo
+Restringir la ingesta a ficheros binarios (PDF/DOCX inicialmente), extrayendo texto y metadatos via Apache Tika antes del chunking. Eliminar soporte a texto plano o URL.
+
+## 2. Inputs
+- Arquitectura en capas de `AGENTS.md`.
+- Estado actual de `IngestServiceImpl` (solo texto/url).
+- Convenciones de naming en `constitution.md`.
+
+## 3. Cambios a realizar
+- Definir interfaz `DocumentParser` en capa de servicio/soporte y una impl `TikaDocumentParser` que reciba `byte[]` o `InputStream` y devuelva texto normalizado + metadatos basicos (content-type, title).
+- Añadir dependencia Apache Tika en `pom.xml` y propiedades de limite de tamaño/mime permitidos.
+- Extender `IngestRequest`/controller para aceptar solo archivo (multipart) y resolver a texto via parser; validar content-type y tamaño.
+- Ajustar `IngestServiceImpl` para exigir binario, eliminar rutas de texto/url y procesar únicamente ficheros PDF/DOCX soportados.
+- Crear pruebas unitarias del parser (PDF y DOCX de muestra) y de la rama nueva de ingesta (mock parser en el servicio) asegurando rechazo de texto/url.
+
+## 4. Criterios de Aceptacion
+- [ ] Compila
+- [ ] Parser devuelve texto esperado en PDF y DOCX simples
+- [ ] Ingesta acepta binarios y sigue funcionando con texto/url
+- [ ] Tests de nuevas rutas pasan en CI/local
+
+## 5. Notas tecnicas
+- Normalizar saltos de linea y encoding a UTF-8; manejar errores de parsing con excepciones especificas.
+- Evitar OOM limitando tamaño de archivo y timeouts de fetch remoto.

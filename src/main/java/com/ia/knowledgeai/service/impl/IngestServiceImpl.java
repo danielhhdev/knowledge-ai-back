@@ -12,18 +12,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ia.knowledgeai.config.IngestProperties;
 import com.ia.knowledgeai.domain.Chunk;
 import com.ia.knowledgeai.domain.Document;
+import com.ia.knowledgeai.domain.ParsedDocument;
 import com.ia.knowledgeai.dto.request.IngestRequest;
 import com.ia.knowledgeai.dto.response.IngestResponse;
+import com.ia.knowledgeai.domain.support.DocumentParser;
 import com.ia.knowledgeai.repository.DocumentRepository;
 import com.ia.knowledgeai.repository.VectorStoreRepository;
 import com.ia.knowledgeai.service.IngestService;
-import com.ia.knowledgeai.service.TextChunker;
+import com.ia.knowledgeai.domain.support.TextChunker;
 
 @Service
 public class IngestServiceImpl implements IngestService {
@@ -35,21 +36,21 @@ public class IngestServiceImpl implements IngestService {
 	private final VectorStoreRepository vectorStoreRepository;
 	private final VectorStore vectorStore;
 	private final TextChunker textChunker;
+	private final DocumentParser documentParser;
 	private final IngestProperties ingestProperties;
-	private final RestClient restClient;
 
 	public IngestServiceImpl(DocumentRepository documentRepository,
 			VectorStoreRepository vectorStoreRepository,
 			VectorStore vectorStore,
 			TextChunker textChunker,
-			IngestProperties ingestProperties,
-			RestClient restClient) {
+			DocumentParser documentParser,
+			IngestProperties ingestProperties) {
 		this.documentRepository = documentRepository;
 		this.vectorStoreRepository = vectorStoreRepository;
 		this.vectorStore = vectorStore;
 		this.textChunker = textChunker;
+		this.documentParser = documentParser;
 		this.ingestProperties = ingestProperties;
-		this.restClient = restClient;
 	}
 
 	@Override
@@ -73,28 +74,38 @@ public class IngestServiceImpl implements IngestService {
 		if (ingestRequest == null) {
 			throw new IllegalArgumentException("Ingest request must not be null");
 		}
-		boolean hasText = ingestRequest.hasText();
-		boolean hasUrl = ingestRequest.hasUrl();
-		if (!hasText && !hasUrl) {
-			throw new IllegalArgumentException("Either text or url must be provided");
+		if (!ingestRequest.hasFile()) {
+			throw new IllegalArgumentException("A file must be provided for ingestion");
 		}
-		if (hasText && hasUrl) {
-			throw new IllegalArgumentException("Provide only one of text or url");
+		MultipartFile file = ingestRequest.getFile();
+		if (file.getSize() > ingestProperties.getMaxFileSizeBytes()) {
+			throw new IllegalArgumentException("File exceeds maximum size of " + ingestProperties.getMaxFileSizeBytes());
+		}
+		if (!ingestProperties.getAllowedContentTypes().isEmpty()
+				&& (file.getContentType() == null
+						|| !ingestProperties.getAllowedContentTypes().contains(file.getContentType()))) {
+			throw new IllegalArgumentException("Unsupported content type: " + file.getContentType());
 		}
 	}
 
 	private String resolveContent(IngestRequest ingestRequest) {
-		if (ingestRequest.hasText()) {
-			return ingestRequest.text().trim();
-		}
 		try {
-			return restClient.get()
-					.uri(ingestRequest.url())
-					.retrieve()
-					.body(String.class);
+			ParsedDocument parsed = documentParser.parse(
+					ingestRequest.getFile().getBytes(),
+					ingestRequest.getFile().getOriginalFilename(),
+					ingestRequest.getFile().getContentType());
+			if (parsed == null || parsed.text() == null) {
+				throw new IllegalArgumentException("Parsed document content is empty or null");
+			}
+			String text = parsed.text().trim();
+			if (text.isBlank()) {
+				throw new IllegalArgumentException("Parsed document has no extractable text (is it a scanned image or empty PDF?)");
+			}
+			return text;
 		}
-		catch (RestClientException ex) {
-			throw new IllegalArgumentException("Unable to fetch content from url", ex);
+		catch (Exception ex) {
+			String filename = ingestRequest.getFile() != null ? ingestRequest.getFile().getOriginalFilename() : "unknown";
+			throw new IllegalArgumentException("Unable to parse file content for " + filename + ": " + ex.getMessage(), ex);
 		}
 	}
 
@@ -108,8 +119,8 @@ public class IngestServiceImpl implements IngestService {
 	}
 
 	private Document saveDocument(IngestRequest ingestRequest) {
-		Document document = new Document(UUID.randomUUID(), ingestRequest.source(), ingestRequest.title(),
-				ingestRequest.tags(), Instant.now());
+		Document document = new Document(UUID.randomUUID(), ingestRequest.getSource(), ingestRequest.getTitle(),
+				ingestRequest.getTags(), Instant.now());
 		return documentRepository.save(document);
 	}
 
