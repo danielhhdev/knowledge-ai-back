@@ -89,21 +89,34 @@ public class QueryServiceImpl implements QueryService {
 				ragProperties.getSimilarityThreshold());
 
 		long start = Instant.now().toEpochMilli();
+		LOGGER.info("Generative retrieval start (topK={}, threshold={}, source={}, tags={})", topK, similarityThreshold,
+				queryRequest.source(), queryRequest.tags());
 		List<Document> documents = retrieveDocuments(queryRequest, topK, similarityThreshold);
+		long retrievalLatency = Instant.now().toEpochMilli() - start;
+		LOGGER.info("Generative retrieval done: {} docs (retrievalMs={})", documents.size(), retrievalLatency);
 		if (documents.isEmpty()) {
 			long latency = Instant.now().toEpochMilli() - start;
-			LOGGER.info("No context found for query={}, returning empty answer", queryRequest.query());
+			LOGGER.info("No context found for query={}, returning empty answer (retrievalMs={})", queryRequest.query(),
+					retrievalLatency);
 			return queryMapper.toGenerativeResult(Collections.emptyList(), "", latency, null, null);
 		}
 
+		long promptStart = Instant.now().toEpochMilli();
 		String context = buildContext(documents);
 		Prompt prompt = ragPromptTemplate.create(Map.of("question", queryRequest.query(), "context", context));
+		long promptLatency = Instant.now().toEpochMilli() - promptStart;
+		long llmStart = Instant.now().toEpochMilli();
+		LOGGER.info("Calling LLM (promptMs={}, promptTokens={}, docs={})", promptLatency, context.length(),
+				documents.size());
 		ChatResponse response = chatModel.call(prompt);
+		long llmLatency = Instant.now().toEpochMilli() - llmStart;
 		String answer = response.getResult().getOutput().getText();
 		Usage usage = response.getMetadata() != null ? response.getMetadata().getUsage() : null;
 		Integer promptTokens = usage != null ? usage.getPromptTokens() : null;
 		Integer completionTokens = usage != null ? usage.getCompletionTokens() : null;
 		long latency = Instant.now().toEpochMilli() - start;
+		LOGGER.info("Answer generated (retrievalMs={}, promptMs={}, llmMs={}, totalMs={}, topK={}, threshold={})",
+				retrievalLatency, promptLatency, llmLatency, latency, topK, similarityThreshold);
 		return queryMapper.toGenerativeResult(documents, answer, latency, promptTokens, completionTokens);
 	}
 
@@ -120,8 +133,12 @@ public class QueryServiceImpl implements QueryService {
 		if (documents.isEmpty()) {
 			return Flux.empty();
 		}
+		long promptStart = Instant.now().toEpochMilli();
 		String context = buildContext(documents);
 		Prompt prompt = ragPromptTemplate.create(Map.of("question", queryRequest.query(), "context", context));
+		long promptLatency = Instant.now().toEpochMilli() - promptStart;
+		LOGGER.info("Streaming answer: prepared prompt (promptMs={}, topK={}, threshold={}, docs={})", promptLatency, topK,
+				similarityThreshold, documents.size());
 		return chatModel.stream(prompt).map(chatResponse -> chatResponse.getResult().getOutput().getText());
 	}
 
@@ -246,11 +263,19 @@ public class QueryServiceImpl implements QueryService {
 				break;
 			}
 			Map<String, Object> metadata = document.getMetadata();
-			contextBuilder.append("DocumentId: ").append(metadata.getOrDefault("documentId", ""))
-					.append(" | Title: ").append(metadata.getOrDefault("title", ""))
-					.append(" | ChunkIndex: ").append(metadata.getOrDefault("chunkIndex", 0))
+			contextBuilder.append("Source [")
+					.append(metadata.getOrDefault("documentId", ""))
+					.append("#")
+					.append(metadata.getOrDefault("chunkIndex", 0))
+					.append("] Title: ").append(metadata.getOrDefault("title", ""))
+					.append(" | Origin: ").append(metadata.getOrDefault("source", ""))
+					.append(" | Tags: ").append(metadata.getOrDefault("tags", ""))
 					.append(System.lineSeparator());
-			contextBuilder.append(document.getText()).append(System.lineSeparator()).append("---")
+			String text = document.getText();
+			if (text != null && text.length() > 600) {
+				text = text.substring(0, 600);
+			}
+			contextBuilder.append(text != null ? text : "").append(System.lineSeparator()).append("---")
 					.append(System.lineSeparator());
 			count++;
 		}

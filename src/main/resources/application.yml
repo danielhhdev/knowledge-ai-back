@@ -26,7 +26,7 @@ rag:
   model: llama3.2
   top-k-default: 5
   top-k-max: 10
-  similarity-threshold: 0.6
+  similarity-threshold: 0.3
   prompt-template: classpath:prompts/rag-answer.st
   streaming-enabled: true
   max-context-documents: 8

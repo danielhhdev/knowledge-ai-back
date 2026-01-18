@@ -92,11 +92,14 @@ Este proyecto será **construido junto con IA**, aplicando SDD en cada fase para
 2. **Levanta la infraestructura**
    ```bash
    docker-compose up -d
+   
+   net stop postgresql-x64-16net stop postgresql-x64-16
    ```
 
 3. **Descarga el modelo de Ollama**
    ```bash
    ollama pull llama3.2
+   ollama rm llama3:8b
    ```
 
 4. **Ejecuta la aplicación**
@@ -241,14 +244,6 @@ MIT License - Siente libre de usar este proyecto para aprender y experimentar.
 
 ---
 
-## 🌟 Próximos Pasos
-
-1. Completa la Fase 0 siguiendo el checklist en `/tasks/phase-0.md`
-2. Revisa la especificación de ingesta en `/specs/ingestion-spec.md`
-3. Experimenta con diferentes modelos de Ollama
-4. Documenta tus aprendizajes en `/docs/learnings.md`
-
----
 
 **¿Listo para construir un RAG de nivel profesional mientras aprendes con IA?** 🚀
 
