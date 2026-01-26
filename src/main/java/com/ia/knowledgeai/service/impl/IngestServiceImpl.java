@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,10 +62,7 @@ public class IngestServiceImpl implements IngestService {
 		validateLength(content);
 
 		Document document = saveDocument(ingestRequest);
-		List<String> chunkTexts = textChunker.chunk(content, ingestProperties.getChunkSize(),
-				ingestProperties.getChunkOverlap());
-		List<Chunk> persistedChunks = persistChunks(document, chunkTexts);
-		storeEmbeddings(document, persistedChunks);
+		List<Chunk> persistedChunks = processChunksWithEmbeddings(document, content);
 
 		int tokensCount = content.length();
 		return new IngestResponse(document.getId(), persistedChunks.size(), tokensCount, STATUS_INGESTED);
@@ -124,6 +122,44 @@ public class IngestServiceImpl implements IngestService {
 		return documentRepository.save(document);
 	}
 
+	private List<Chunk> processChunksWithEmbeddings(Document document, String content) {
+		int chunkSize = ingestProperties.getChunkSize();
+		int maxTokens = ingestProperties.getEmbeddingMaxTokens();
+		int baseChunkSize = maxTokens > 0 ? Math.min(chunkSize, maxTokens) : chunkSize;
+		if (maxTokens > 0 && maxTokens < chunkSize) {
+			LOGGER.info("Reducing chunk size from {} to embedding max tokens {}", chunkSize, maxTokens);
+		}
+		int minChunkSize = Math.max(1, Math.min(baseChunkSize, 16));
+		int currentChunkSize = baseChunkSize;
+		while (true) {
+			List<String> chunkTexts = textChunker.chunk(content, currentChunkSize,
+					ingestProperties.getChunkOverlap(), currentChunkSize);
+			try {
+				storeEmbeddings(document, chunkTexts);
+				return persistChunks(document, chunkTexts);
+			}
+			catch (NonTransientAiException ex) {
+				if (isContextLengthError(ex) && currentChunkSize > minChunkSize) {
+					int nextChunkSize = Math.max(minChunkSize, currentChunkSize / 2);
+					if (nextChunkSize == currentChunkSize) {
+						throw ex;
+					}
+					LOGGER.warn(
+							"Embedding input exceeded context length, retrying with smaller chunk size {} (was {})",
+							nextChunkSize, currentChunkSize);
+					currentChunkSize = nextChunkSize;
+					continue;
+				}
+				throw ex;
+			}
+		}
+	}
+
+	private boolean isContextLengthError(NonTransientAiException ex) {
+		String message = ex.getMessage();
+		return message != null && message.toLowerCase().contains("context length");
+	}
+
 	private List<Chunk> persistChunks(Document document, List<String> chunkTexts) {
 		List<Chunk> chunks = new ArrayList<>();
 		int index = 0;
@@ -139,22 +175,30 @@ public class IngestServiceImpl implements IngestService {
 		return chunks;
 	}
 
-	private void storeEmbeddings(Document document, List<Chunk> chunks) {
-		if (chunks.isEmpty()) {
+	private void storeEmbeddings(Document document, List<String> chunkTexts) {
+		if (chunkTexts.isEmpty()) {
 			LOGGER.warn("No chunks generated for document {}", document.getId());
 			return;
 		}
 		List<org.springframework.ai.document.Document> vectorDocuments = new ArrayList<>();
-		for (Chunk chunk : chunks) {
+		int index = 0;
+		for (String chunkText : chunkTexts) {
+			if (chunkText == null || chunkText.isBlank()) {
+				continue;
+			}
 			Map<String, Object> metadata = new HashMap<>();
 			metadata.put("documentId", document.getId().toString());
-			metadata.put("chunkIndex", chunk.getIndex());
+			metadata.put("chunkIndex", index++);
 			metadata.put("source", document.getSource());
 			metadata.put("title", document.getTitle());
 			metadata.put("tags", document.getTags());
-			vectorDocuments.add(new org.springframework.ai.document.Document(chunk.getText(), metadata));
+			vectorDocuments.add(new org.springframework.ai.document.Document(chunkText, metadata));
 		}
-		vectorStore.add(vectorDocuments);
-		LOGGER.info("Stored {} chunks for document {}", chunks.size(), document.getId());
+		int batchSize = Math.max(1, ingestProperties.getEmbeddingBatchSize());
+		for (int start = 0; start < vectorDocuments.size(); start += batchSize) {
+			int end = Math.min(start + batchSize, vectorDocuments.size());
+			vectorStore.add(vectorDocuments.subList(start, end));
+		}
+		LOGGER.info("Stored {} chunks for document {}", vectorDocuments.size(), document.getId());
 	}
 }

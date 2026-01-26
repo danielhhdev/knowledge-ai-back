@@ -3,6 +3,8 @@ package com.ia.knowledgeai.service.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -84,5 +87,35 @@ class IngestServiceImplTest {
 		assertThatThrownBy(() -> ingestService.ingest(request))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("file must be provided for ingestion");
+	}
+
+	@Test
+	void shouldRetryWithSmallerChunksWhenEmbeddingContextExceeded() {
+		IngestProperties properties = new IngestProperties();
+		properties.setChunkSize(64);
+		properties.setChunkOverlap(8);
+		properties.setMaxTextLength(5000);
+
+		IngestServiceImpl retryService = new IngestServiceImpl(documentRepository, vectorStoreRepository, vectorStore,
+				textChunker, documentParser, properties);
+
+		UUID documentId = UUID.randomUUID();
+		when(documentRepository.save(any()))
+				.thenReturn(new Document(documentId, "source", "title", List.of("tag"), Instant.now()));
+		when(documentParser.parse(any(), any(), any()))
+				.thenReturn(new ParsedDocument(
+						"one two three four five six seven eight nine ten eleven twelve thirteen fourteen",
+						"application/pdf"));
+		doThrow(new NonTransientAiException("HTTP 400 - {\"error\":\"the input length exceeds the context length\"}"))
+				.doNothing()
+				.when(vectorStore).add(any());
+
+		MockMultipartFile file = new MockMultipartFile("file", "sample.pdf", "application/pdf", "pdf-content".getBytes());
+		IngestRequest request = new IngestRequest("source", "title", List.of("tag1"), file);
+		IngestResponse response = retryService.ingest(request);
+
+		assertThat(response.documentId()).isEqualTo(documentId);
+		verify(vectorStore, atLeast(2)).add(any());
+		verify(vectorStoreRepository).saveAll(any());
 	}
 }

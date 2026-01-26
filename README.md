@@ -93,7 +93,7 @@ Este proyecto será **construido junto con IA**, aplicando SDD en cada fase para
    ```bash
    docker-compose up -d
    
-   net stop postgresql-x64-16net stop postgresql-x64-16
+   net stop postgresql-x64-16
    ```
 
 3. **Descarga el modelo de Ollama**

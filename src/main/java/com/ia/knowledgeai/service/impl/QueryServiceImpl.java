@@ -262,15 +262,6 @@ public class QueryServiceImpl implements QueryService {
 			if (count >= maxDocs) {
 				break;
 			}
-			Map<String, Object> metadata = document.getMetadata();
-			contextBuilder.append("Source [")
-					.append(metadata.getOrDefault("documentId", ""))
-					.append("#")
-					.append(metadata.getOrDefault("chunkIndex", 0))
-					.append("] Title: ").append(metadata.getOrDefault("title", ""))
-					.append(" | Origin: ").append(metadata.getOrDefault("source", ""))
-					.append(" | Tags: ").append(metadata.getOrDefault("tags", ""))
-					.append(System.lineSeparator());
 			String text = document.getText();
 			if (text != null && text.length() > 600) {
 				text = text.substring(0, 600);
