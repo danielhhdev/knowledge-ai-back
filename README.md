@@ -21,38 +21,38 @@ Este proyecto será **construido junto con IA**, aplicando SDD en cada fase para
 ## 🏗️ Arquitectura del Sistema
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    API REST Layer                           │
-│        /api/v1/documents/ingest  /api/v1/query  /api/health │
-└─────────────────────────────────────────────────────────────┘
-                        │
-        ┌───────────────┴───────────────┐
-        │                               │
-        ▼                               ▼
-┌────────────────────┐              ┌────────────────────┐
-│ Ingestion          │              │ RAG Query          │
-│ Pipeline           │              │ Engine             │
-│                    │              │                    │
-│ • Parser           │              │ • Retrieval        │
-│ • Chunker          │              │ • Ranking          │
-│ • Embedder         │              │ • Generation       │
-└────────────┬───────┘              └────────────┬───────┘
-             │                               │
-             │    ┌────────────────────┐     │
-             └───►│   Spring AI        │◄────┘
-                  │   LLM Client       │
-                  └─────────┬──────────┘
-                            │
-          ┌─────────────────┴───────────────────┐
-          │                      │               │
-          ▼                      ▼               ▼
-    ┌────────────┐        ┌───────────────┐  ┌─────────────┐
-    │  Ollama    │        │ PostgreSQL    │  │  PgVector   │
-    │  Models    │        │               │  │             │
-    │ llama3.2   │        │  Embeddings   │  │  Vector DB  │
-    │ phi3.5     │        │   Storage     │  │             │
-    │ mistral    │        └───────────────┘  └─────────────┘
-    └────────────┘
++-------------------------------------------------------------+
+¦                    API REST Layer                           ¦
+¦/api/v1/documents/ingest  /api/v1/query ¦
++-------------------------------------------------------------+
+                        ¦
+        +-------------------------------+
+        ¦                               ¦
+        ?                               ?
++--------------------+              +--------------------+
+¦ Ingestion          ¦              ¦ RAG Query          ¦
+¦ Pipeline           ¦              ¦ Engine             ¦
+¦                    ¦              ¦                    ¦
+¦ • Parser           ¦              ¦ • Retrieval        ¦
+¦ • Chunker          ¦              ¦ • Ranking          ¦
+¦ • Embedder         ¦              ¦ • Generation       ¦
++--------------------+              +--------------------+
+             ¦                               ¦
+             ¦    +--------------------+     ¦
+             +---?¦   Spring AI        ¦?----+
+                  ¦   LLM Client       ¦
+                  +--------------------+
+                            ¦
+          +-------------------------------------+
+          ¦                      ¦               ¦
+          ?                      ?               ?
+    +------------+        +---------------+  +-------------+
+    ¦  Ollama    ¦        ¦ PostgreSQL    ¦  ¦  PgVector   ¦
+    ¦  Models    ¦        ¦               ¦  ¦             ¦
+    ¦ llama3.2   ¦        ¦  Embeddings   ¦  ¦  Vector DB  ¦
+    ¦ phi3.5     ¦        ¦   Storage     ¦  ¦             ¦
+    ¦ mistral    ¦        +---------------+  +-------------+
+    +------------+
 ```
 
 ---
@@ -84,8 +84,8 @@ Este proyecto será **construido junto con IA**, aplicando SDD en cada fase para
 
 1. **Clona el repositorio**
    ```bash
-   git clone https://github.com/danielhhdev/knowledgeAI.git
-   cd knowledgeAI
+   git clone https://github.com/danielhhdev/knowledge-ai-back.git
+   cd knowledge-ai-back
    ```
 
 2. **Levanta la infraestructura**
@@ -118,19 +118,19 @@ Este proyecto será **construido junto con IA**, aplicando SDD en cada fase para
 
 ---
 
-## 📐 Metodología: Spec-Driven Development
+## 🧠 Metodología: Spec-Driven Development
 
 Este proyecto sigue el enfoque **SDD**, donde cada funcionalidad nace de una especificación clara y se desarrolla mediante pasos estructurados:
 
 ```
 SPEC → Define el "qué" y el "por qué"
-  ↓
+  ?
 PLAN → Diseño técnico y decisiones de arquitectura
-  ↓
+  ?
 TASKS → Desglose en tareas atómicas y ejecutables
-  ↓
+  ?
 GENERATION → Desarrollo asistido por IA mediante prompts
-  ↓
+  ?
 REVIEW → Validación, testing y refinamiento
 ```
 
@@ -138,25 +138,25 @@ REVIEW → Validación, testing y refinamiento
 
 ```
 knowledgeAI/
-├── sdd/
-│   ├── specs/              # Especificaciones funcionales
-│   ├── plans/              # Planes técnicos y arquitectura
-│   ├── tasks/              # Tareas desglosadas por fase
-│   └── prompts/            # Plantillas de prompts para IA
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   └── resources/
-│   └── test/
-├── docker-compose.yml
-└── README.md
++-- sdd/
+¦   +-- specs/              # Especificaciones funcionales
+¦   +-- plans/              # Planes técnicos y arquitectura
+¦   +-- tasks/              # Tareas desglosadas por fase
+¦   +-- prompts/            # Plantillas de prompts para IA
++-- src/
+¦   +-- main/
+¦   ¦   +-- java/
+¦   ¦   +-- resources/
+¦   +-- test/
++-- docker-compose.yml
++-- README.md
 ```
 
 ---
 
 ## ✅ Estado actual (enero 2026)
 
-- **Implementado**: ingesta de documentos (`/api/v1/documents/ingest`) con parsing, chunking y embeddings; búsqueda semántica (`/api/v1/query`); generación RAG (`/api/v1/query/answer`) y streaming SSE (`/api/v1/query/answer/stream`); health check (`/api/health`).
+- **Implementado**: ingesta de documentos (`/api/v1/documents/ingest`) con parsing, chunking y embeddings; búsqueda semántica (`/api/v1/query`); generación RAG (`/api/v1/query/answer`) y streaming SSE (`/api/v1/query/answer/stream`); 
 - **Pendiente**: gestión de documentos (`/api/v1/documents`) y endpoints asociados; mejoras de recuperación híbrida y re-ranking en roadmap.
 
 ---
@@ -190,13 +190,11 @@ knowledgeAI/
 - Streaming de respuestas
 - Manejo de errores y fallbacks
 
-### 🌐 Fase 4: API REST
+### 🌐 Fase 4: Exposición y contrato (API + OpenAPI)
 - `POST /api/v1/documents/ingest` - Carga de documentos
 - `POST /api/v1/query` - Consultas RAG
 - `POST /api/v1/query/answer` - Respuestas RAG
 - `POST /api/v1/query/answer/stream` - Respuestas RAG (streaming)
-- `GET /api/health` - Estado del sistema
-- `GET /api/v1/documents` - Gestión de documentos
 - Documentación OpenAPI/Swagger
 
 ---
@@ -256,4 +254,7 @@ MIT License - Siente libre de usar este proyecto para aprender y experimentar.
 
 ---
 
-**¿Listo para construir un RAG de nivel profesional mientras aprendes con IA?** 🚀
+**¿Listo para construir un RAG de nivel profesional mientras aprendes con IA?** 🌟
+
+
+
