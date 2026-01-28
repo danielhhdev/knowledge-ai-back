@@ -1,10 +1,10 @@
-# DevKnowledge RAG
+﻿# Knowledge AI
 
 > Un proyecto de aprendizaje práctico para dominar RAG, Spring AI y desarrollo asistido por IA
 
 ## 🎯 ¿Qué es este proyecto?
 
-Knowledge IA es un sistema completo de **Retrieval-Augmented Generation** construido con tecnologías modernas. Más que un proyecto funcional, es un **laboratorio de aprendizaje** donde dominar:
+Knowledge AI es un sistema completo de **Retrieval-Augmented Generation** construido con tecnologías modernas. Más que un proyecto funcional, es un **laboratorio de aprendizaje** donde dominar:
 
 - **Arquitectura RAG de principio a fin**: desde la ingesta de documentos hasta la generación de respuestas contextualizadas
 - **Spring AI**: framework nativo para integrar LLMs en aplicaciones Spring Boot
@@ -21,39 +21,38 @@ Este proyecto será **construido junto con IA**, aplicando SDD en cada fase para
 ## 🏗️ Arquitectura del Sistema
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    API REST Layer                        │
-│              /ingest  /query  /health                    │
-└───────────────────────┬─────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    API REST Layer                           │
+│        /api/v1/documents/ingest  /api/v1/query  /api/health │
+└─────────────────────────────────────────────────────────────┘
                         │
         ┌───────────────┴───────────────┐
         │                               │
         ▼                               ▼
-┌───────────────┐              ┌──────────────┐
-│ Ingestion     │              │ RAG Query    │
-│ Pipeline      │              │ Engine       │
-│               │              │              │
-│ • Parser      │              │ • Retrieval  │
-│ • Chunker     │              │ • Ranking    │
-│ • Embedder    │              │ • Generation │
-└───────┬───────┘              └──────┬───────┘
-        │                             │
-        │    ┌────────────────┐       │
-        └───►│   Spring AI    │◄──────┘
-             │  LLM Client    │
-             └────────┬───────┘
-                      │
-          ┌───────────┴──────────┐
-          │                      │
-          ▼                      ▼
-    ┌──────────┐          ┌───────────┐
-    │  Ollama  │          │PostgreSQL │
-    │  Models  │          │ + PgVector│
-    │          │          │           │
-    │ llama3.2 │          │ Embeddings│
-    │ phi3.5   │          │  Storage  │
-    │ mistral  │          │           │
-    └──────────┘          └───────────┘
+┌────────────────────┐              ┌────────────────────┐
+│ Ingestion          │              │ RAG Query          │
+│ Pipeline           │              │ Engine             │
+│                    │              │                    │
+│ • Parser           │              │ • Retrieval        │
+│ • Chunker          │              │ • Ranking          │
+│ • Embedder         │              │ • Generation       │
+└────────────┬───────┘              └────────────┬───────┘
+             │                               │
+             │    ┌────────────────────┐     │
+             └───►│   Spring AI        │◄────┘
+                  │   LLM Client       │
+                  └─────────┬──────────┘
+                            │
+          ┌─────────────────┴───────────────────┐
+          │                      │               │
+          ▼                      ▼               ▼
+    ┌────────────┐        ┌───────────────┐  ┌─────────────┐
+    │  Ollama    │        │ PostgreSQL    │  │  PgVector   │
+    │  Models    │        │               │  │             │
+    │ llama3.2   │        │  Embeddings   │  │  Vector DB  │
+    │ phi3.5     │        │   Storage     │  │             │
+    │ mistral    │        └───────────────┘  └─────────────┘
+    └────────────┘
 ```
 
 ---
@@ -85,33 +84,36 @@ Este proyecto será **construido junto con IA**, aplicando SDD en cada fase para
 
 1. **Clona el repositorio**
    ```bash
-   git clone https://github.com/tu-usuario/devknowledge-rag.git
-   cd devknowledge-rag
+   git clone https://github.com/danielhhdev/knowledgeAI.git
+   cd knowledgeAI
    ```
 
 2. **Levanta la infraestructura**
    ```bash
    docker-compose up -d
-   
+   ```
+
+3. **Si ya tienes PostgreSQL local, detén el servicio para evitar conflicto de puertos**
+   ```bash
    net stop postgresql-x64-16
    ```
 
-3. **Descarga el modelo de Ollama**
+4. **Descarga el modelo de Ollama**
    ```bash
    ollama pull llama3.2
    ollama rm llama3:8b
    ```
 
-4. **Ejecuta la aplicación**
+5. **Ejecuta la aplicación**
    ```bash
    ./mvnw spring-boot:run
    ```
 
-5. **Prueba el sistema**
+6. **Prueba el sistema**
    ```bash
-   curl -X POST http://localhost:8080/api/query \
+   curl -X POST http://localhost:8080/api/v1/query/answer \
      -H "Content-Type: application/json" \
-     -d '{"question": "¿Qué información tienes almacenada?"}'
+     -d '{"query": "¿Qué información tienes almacenada?"}'
    ```
 
 ---
@@ -135,23 +137,31 @@ REVIEW → Validación, testing y refinamiento
 ### Estructura del Proyecto
 
 ```
-devknowledge-rag/
-├── specs/              # Especificaciones funcionales
-├── plans/              # Planes técnicos y arquitectura
-├── tasks/              # Tareas desglosadas por fase
-├── prompts/            # Plantillas de prompts para IA
-├── docs/               # Documentación técnica
+knowledgeAI/
+├── sdd/
+│   ├── specs/              # Especificaciones funcionales
+│   ├── plans/              # Planes técnicos y arquitectura
+│   ├── tasks/              # Tareas desglosadas por fase
+│   └── prompts/            # Plantillas de prompts para IA
 ├── src/
 │   ├── main/
 │   │   ├── java/
 │   │   └── resources/
 │   └── test/
-└── docker/             # Configuración de contenedores
+├── docker-compose.yml
+└── README.md
 ```
 
 ---
 
-## 🗓️ Roadmap del Proyecto
+## ✅ Estado actual (enero 2026)
+
+- **Implementado**: ingesta de documentos (`/api/v1/documents/ingest`) con parsing, chunking y embeddings; búsqueda semántica (`/api/v1/query`); generación RAG (`/api/v1/query/answer`) y streaming SSE (`/api/v1/query/answer/stream`); health check (`/api/health`).
+- **Pendiente**: gestión de documentos (`/api/v1/documents`) y endpoints asociados; mejoras de recuperación híbrida y re-ranking en roadmap.
+
+---
+
+## 🗺️ Roadmap del Proyecto
 
 ### ✅ Fase 0: Configuración del Entorno
 - Proyecto Spring Boot 3.4 con Java 21
@@ -181,10 +191,12 @@ devknowledge-rag/
 - Manejo de errores y fallbacks
 
 ### 🌐 Fase 4: API REST
-- `POST /api/ingest` - Carga de documentos
-- `POST /api/query` - Consultas RAG
+- `POST /api/v1/documents/ingest` - Carga de documentos
+- `POST /api/v1/query` - Consultas RAG
+- `POST /api/v1/query/answer` - Respuestas RAG
+- `POST /api/v1/query/answer/stream` - Respuestas RAG (streaming)
 - `GET /api/health` - Estado del sistema
-- `GET /api/documents` - Gestión de documentos
+- `GET /api/v1/documents` - Gestión de documentos
 - Documentación OpenAPI/Swagger
 
 ---
@@ -193,7 +205,6 @@ devknowledge-rag/
 
 ### Spring AI
 Framework oficial de Spring para integrar IA en aplicaciones empresariales.
-
 
 ### Ollama
 Ejecuta modelos de lenguaje de última generación localmente, sin dependencias cloud.
@@ -205,6 +216,7 @@ Ejecuta modelos de lenguaje de última generación localmente, sin dependencias 
 
 ### PgVector
 Extensión de PostgreSQL para almacenamiento y búsqueda de vectores.
+
 ---
 
 ## 🤖 IA como Copiloto
@@ -244,9 +256,4 @@ MIT License - Siente libre de usar este proyecto para aprender y experimentar.
 
 ---
 
-
 **¿Listo para construir un RAG de nivel profesional mientras aprendes con IA?** 🚀
-
-```bash
-./mvnw spring-boot:run
-```
