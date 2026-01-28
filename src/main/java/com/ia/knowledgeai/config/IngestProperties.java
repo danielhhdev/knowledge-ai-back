@@ -11,6 +11,10 @@ public class IngestProperties {
 
 	private int maxTextLength = 20000;
 
+	private int embeddingBatchSize = 16;
+
+	private int embeddingMaxTokens = 0;
+
 	private long maxFileSizeBytes = 10 * 1024 * 1024;
 
 	private java.util.List<String> allowedContentTypes = java.util.List.of(
@@ -39,6 +43,22 @@ public class IngestProperties {
 
 	public void setMaxTextLength(int maxTextLength) {
 		this.maxTextLength = maxTextLength;
+	}
+
+	public int getEmbeddingBatchSize() {
+		return embeddingBatchSize;
+	}
+
+	public void setEmbeddingBatchSize(int embeddingBatchSize) {
+		this.embeddingBatchSize = embeddingBatchSize;
+	}
+
+	public int getEmbeddingMaxTokens() {
+		return embeddingMaxTokens;
+	}
+
+	public void setEmbeddingMaxTokens(int embeddingMaxTokens) {
+		this.embeddingMaxTokens = embeddingMaxTokens;
 	}
 
 	public long getMaxFileSizeBytes() {

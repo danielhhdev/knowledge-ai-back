@@ -19,14 +19,16 @@ spring:
       base-url: http://localhost:11434
       embedding:
         model: nomic-embed-text
+        options:
+          truncate: true
       chat:
-        model: llama3.2
+        model: qwen2.5:3b-instruct
 
 rag:
-  model: llama3.2
+  model: qwen2.5:3b-instruct
   top-k-default: 5
   top-k-max: 10
-  similarity-threshold: 0.6
+  similarity-threshold: 0.3
   prompt-template: classpath:prompts/rag-answer.st
   streaming-enabled: true
   max-context-documents: 8
@@ -42,4 +44,6 @@ logging:
 ingest:
   chunk-size: 256
   chunk-overlap: 32
+  embedding-batch-size: 16
+  embedding-max-tokens: 128
   max-text-length: 20000000
