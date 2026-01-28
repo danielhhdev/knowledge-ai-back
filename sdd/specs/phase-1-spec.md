@@ -1,7 +1,6 @@
 # SPEC - Fase 1 / Ingesta inicial de documentos
 
 ## 1. Contexto Heredado
-- **Funcionalidades existentes**: Arranque de Spring Boot con perfil `dev`, endpoint `/api/health` basico.
 - **Modulos reutilizables**: Estructura de capas definida (controller/service/dto/mapper/domain/repository/config); Docker Compose con PostgreSQL + PgVector; configuracion inicial de perfiles.
 - **Modelos de datos previos**: Ninguno persistido; solo placeholders de capas.
 - **Estado del proyecto**: Fase 0 completada; proyecto listo para implementar primeros flujos RAG.

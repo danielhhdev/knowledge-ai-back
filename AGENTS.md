@@ -61,60 +61,45 @@ Este documento define la arquitectura en capas del sistema **Knowledge RAG**, un
 
 ## 📦 Estructura de Capas
 
+
 ```
 com.devknowledge.rag/
-├── controller/              # Capa de presentación
-│   ├── IngestController.java           # Interface
-│   ├── QueryController.java            # Interface
-│   ├── DocumentController.java         # Interface
-│   ├── HealthController.java           # Interface
-│   └── impl/                           # Implementaciones
-│       ├── IngestControllerImpl.java
-│       ├── QueryControllerImpl.java
-│       ├── DocumentControllerImpl.java
-│       └── HealthControllerImpl.java
-│
-├── service/                 # Capa de negocio
-│   ├── IngestService.java              # Interface
-│   ├── QueryService.java               # Interface
-│   ├── DocumentService.java            # Interface
-│   ├── HealthService.java              # Interface
-│   └── impl/                           # Implementaciones
-│       ├── IngestServiceImpl.java      # Pipeline completo
-│       ├── QueryServiceImpl.java       # RAG engine
-│       ├── DocumentServiceImpl.java    # Gestión docs
-│       └── HealthServiceImpl.java      # System checks
-│
-├── dto/                     # Data Transfer Objects
-│   ├── request/
-│   │   ├── IngestRequest.java
-│   │   ├── QueryRequest.java
-│   │   └── DocumentFilterRequest.java
-│   └── response/
-│       ├── IngestResponse.java
-│       ├── QueryResponse.java
-│       ├── DocumentResponse.java
-│       └── HealthResponse.java
-│
-├── mapper/                  # Transformaciones DTO ↔ Domain
-│   ├── DocumentMapper.java
-│   ├── QueryMapper.java
-│   └── HealthMapper.java
-│
-├── domain/                  # Modelos de dominio
-│   ├── Document.java
-│   ├── Chunk.java
-│   ├── Embedding.java
-│   └── QueryResult.java
-│
-├── repository/              # Capa de persistencia
-│   ├── DocumentRepository.java
-│   └── VectorStoreRepository.java
-│
-└── config/                  # Configuración
-    ├── SpringAIConfig.java
-    ├── OllamaConfig.java
-    └── OpenAPIConfig.java
++-- controller/              # Capa de presentaci�n
+�   +-- IngestController.java           # Interface
+�   +-- QueryController.java            # Interface
+�   +-- impl/                           # Implementaciones
+�       +-- IngestControllerImpl.java
+�       +-- QueryControllerImpl.java
++-- service/                 # Capa de negocio
+�   +-- IngestService.java              # Interface
+�   +-- QueryService.java               # Interface
+�   +-- impl/                           # Implementaciones
+�       +-- IngestServiceImpl.java      # Pipeline completo
+�       +-- QueryServiceImpl.java       # RAG engine
++-- dto/                     # Data Transfer Objects
+�   +-- request/
+�   �   +-- IngestRequest.java
+�   �   +-- QueryRequest.java
+�   �   +-- DocumentFilterRequest.java
+�   +-- response/
+�       +-- IngestResponse.java
+�       +-- QueryResponse.java
+�       +-- DocumentResponse.java
++-- mapper/                  # Transformaciones DTO ? Domain
+�   +-- DocumentMapper.java
+�   +-- QueryMapper.java
++-- domain/                  # Modelos de dominio
+�   +-- Document.java
+�   +-- Chunk.java
+�   +-- Embedding.java
+�   +-- QueryResult.java
++-- repository/              # Capa de persistencia
+�   +-- DocumentRepository.java
+�   +-- VectorStoreRepository.java
++-- config/                  # Configuraci�n
+    +-- SpringAIConfig.java
+    +-- OllamaConfig.java
+    +-- OpenAPIConfig.java
 ```
 
 ---
@@ -283,3 +268,4 @@ Este documento debe evolucionar con el proyecto:
 - Revisar nombres y convenciones segun este documento y `constitution.md`.
 - Actualizar artefactos SDD (spec/plan/tasks) si cambio el alcance o el comportamiento.
 - Resumir cambios y riesgos pendientes en la respuesta de salida.
+

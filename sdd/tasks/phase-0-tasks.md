@@ -6,9 +6,7 @@
 | TASK 2 | Añadir dependencias Maven base |
 | TASK 3 | Configurar perfiles y properties en `application.yml` |
 | TASK 4 | Crear `docker-compose.yml` con PostgreSQL + PgVector |
-| TASK 5 | Implementar contrato `/api/health` (controller + service + DTO) |
 | TASK 6 | Añadir configuración base de OpenAPI y Spring AI/Ollama placeholders |
-| TASK 7 | Prueba de integración para `/api/health` |
 | TASK 8 | Validación local de arranque y pruebas |
 
 ---
@@ -25,9 +23,6 @@ Crear la estructura de paquetes conforme a `AGENTS.md`, con interfaces e impleme
 
 ## 3. Cambios a realizar
 - Crear paquetes `com.devknowledge.rag.controller`, `.controller.impl`, `.service`, `.service.impl`, `.dto.request`, `.dto.response`, `.mapper`, `.domain`, `.repository`, `.config`.
-- Añadir interfaces vacías para controladores: `IngestController`, `QueryController`, `DocumentController`, `HealthController`.
-- Añadir interfaces vacías para servicios: `IngestService`, `QueryService`, `DocumentService`, `HealthService`.
-- Crear clases placeholder (sin lógica) en `domain`, `mapper`, `repository` para mantener la estructura (p.ej., `Document`, `Chunk`, `Embedding`, `QueryResult`, `DocumentMapper`, `QueryMapper`, `HealthMapper`, `DocumentRepository`, `VectorStoreRepository`).
 - Garantizar que las clases públicas y records sigan `PascalCase` y los paquetes en minúsculas.
 
 ## 4. Criterios de Aceptación
@@ -121,23 +116,16 @@ Proveer infraestructura local para PostgreSQL 16 con extensión PgVector lista p
 
 ---
 
-# TASK 5 - Implementar contrato `/api/health` (controller + service + DTO)
 
 ## 1. Objetivo
-Exponer endpoint `GET /api/health` que devuelva estado `UP` y timestamp ISO, cumpliendo separación de capas.
 
 ## 2. Inputs
-- Interfaces `HealthController` y `HealthService` (TASK 1)
 - Requisito RF-01 y flujo técnico
 
 ## 3. Cambios a realizar
-- Definir `HealthResponse` como `record` con campos `status` y `timestamp`.
-- Implementar `HealthServiceImpl` que construya la respuesta sin lógica de infraestructura externa.
-- Implementar `HealthControllerImpl` (`@RestController`) que delegue en el servicio y devuelva `ResponseEntity<HealthResponse>`.
 - Añadir logging INFO de entrada al endpoint.
 
 ## 4. Criterios de Aceptación
-- [ ] `/api/health` responde `200 OK` con payload `{ "status": "UP", "timestamp": "<ISO-8601>" }`.
 - [ ] Sin lógica de negocio en controller; servicio encapsula respuesta.
 - [ ] Contrato alineado con spec y plan.
 
@@ -172,23 +160,18 @@ Preparar configuración mínima para OpenAPI y beans placeholder de Spring AI/Ol
 
 ---
 
-# TASK 7 - Prueba de integración para `/api/health`
 
 ## 1. Objetivo
-Validar que el endpoint `/api/health` responde conforme al contrato en un contexto de aplicación real.
 
 ## 2. Inputs
-- Implementación de `HealthControllerImpl` y `HealthServiceImpl`
 - Dependencias de test agregadas en TASK 2
 
 ## 3. Cambios a realizar
 - Crear test de integración en `src/test/java/.../controller` usando `@SpringBootTest` o `@WebMvcTest`.
-- Verificar que `GET /api/health` retorna `200` y cuerpo con `status="UP"` y `timestamp` no vacío.
 - Incluir profile `dev` en el test si aplica.
 
 ## 4. Criterios de Aceptación
 - [ ] Test pasa consistentemente con `./mvnw test`.
-- [ ] Cobertura mínima asegurada para el endpoint de health.
 - [ ] El test no depende de servicios externos (DB opcionalmente mockeada/inactiva).
 
 ## 5. Notas técnicas
@@ -209,13 +192,11 @@ Confirmar que la aplicación arranca y las pruebas se ejecutan exitosamente con 
 ## 3. Cambios a realizar
 - Ejecutar `docker-compose up -d` para levantar PostgreSQL+PgVector (solo si aplica a la validación).
 - Ejecutar `./mvnw test` y corregir fallos.
-- Ejecutar `./mvnw spring-boot:run` con perfil `dev` y verificar `/api/health`.
 - Registrar resultados o ajustes necesarios en caso de fallo.
 
 ## 4. Criterios de Aceptación
 - [ ] `./mvnw test` pasa sin errores.
 - [ ] Aplicación arranca en < 30s en perfil `dev`.
-- [ ] `GET /api/health` responde como esperado en local.
 - [ ] Compose levanta PostgreSQL sin errores (si se prueba).
 
 ## 5. Notas técnicas

@@ -1,7 +1,6 @@
 # SPEC - Fase 2 / Motor de Recuperacion
 
 ## 1. Contexto Heredado
-- **Funcionalidades existentes**: Health check; ingesta via `/api/v1/documents/ingest` con chunking, validaciones y almacenamiento en Postgres + embeddings en PgVector mediante `VectorStore.add`.
 - **Modulos reutilizables**: `DocumentRepository`, `VectorStoreRepository`, `TextChunker`, `DocumentParser`, `PgVectorStore` configurado, DTOs `QueryRequest`/`QueryResponse` y dominio `QueryResult` (stub).
 - **Modelos de datos previos**: Tablas `documents`, `chunks` y tabla de vector store gestionada por Spring AI con metadata (documentId, chunkIndex, source, title, tags).
 - **Estado del proyecto**: Fase 1 cerrada; capa de query/document pendiente de implementacion real.

@@ -23,7 +23,7 @@ Este proyecto será **construido junto con IA**, aplicando SDD en cada fase para
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    API REST Layer                        │
-│              /ingest  /query  /health                    │
+│              /ingest  /query                     │
 └───────────────────────┬─────────────────────────────────┘
                         │
         ┌───────────────┴───────────────┐
@@ -85,7 +85,7 @@ Este proyecto será **construido junto con IA**, aplicando SDD en cada fase para
 
 1. **Clona el repositorio**
    ```bash
-   git clone https://github.com/tu-usuario/devknowledge-rag.git
+   git clone https://github.com/danielhhdev/knowledge-ai-back.git
    cd devknowledge-rag
    ```
 
@@ -180,8 +180,6 @@ devknowledge-rag/
 ### 🌐 Fase 4: API REST
 - `POST /api/ingest` - Carga de documentos
 - `POST /api/query` - Consultas RAG
-- `GET /api/health` - Estado del sistema
-- `GET /api/documents` - Gestión de documentos
 - Documentación OpenAPI/Swagger
 
 ---

@@ -1,4 +1,4 @@
-package com.ia.knowledgeai.controller;
+package com.ia.knowledgeai.exception;
 
 import java.util.Map;
 import java.util.stream.Collectors;

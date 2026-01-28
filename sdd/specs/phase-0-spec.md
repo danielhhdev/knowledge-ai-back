@@ -4,7 +4,6 @@
 - **Funcionalidades existentes**: Ninguna funcionalidad productiva; repositorio inicial con documentos de arquitectura (`AGENTS.md`, `constitution.md`) y README.
 - **Modulos reutilizables**: Ninguno implementado; solo scripts Maven Wrapper (`mvnw`) y estructura base de proyecto Spring Boot sin capas completas.
 - **Modelos de datos previos**: No hay entidades persistidas ni esquemas de DB definidos.
-- **Estado del proyecto**: Fase inicial previa a desarrollo de pipelines (ingesta, query, health).
 
 ---
 
@@ -18,7 +17,6 @@ Preparar el entorno de desarrollo y el esqueleto técnico mínimo para habilitar
 - [ ] Configurar proyecto Spring Boot 3.4 con Java 21 y dependencias base (Spring Web, Spring Data, PgVector, Spring AI, Lombok).
 - [ ] Configurar Docker Compose para PostgreSQL + PgVector y, opcionalmente, Ollama service placeholder.
 - [ ] Crear estructura de paquetes según `AGENTS.md` (controller, service, dto, mapper, domain, repository, config).
-- [ ] Implementar endpoint `/api/health` mínimo que verifique arranque de la app (sin dependencias externas aún).
 - [ ] Configurar perfiles de entorno (dev/local) y variables principales (DB, vector store, Ollama endpoint).
 
 ### Fuera de Scope (Lo que NO se implementa en esta fase)
@@ -30,7 +28,6 @@ Preparar el entorno de desarrollo y el esqueleto técnico mínimo para habilitar
 ---
 
 ## 4. Requisitos Funcionales
-- **RF-01**: La aplicación DEBE iniciar con perfil `dev` y exponer `/api/health` respondiendo `200 OK`.
 - **RF-02**: El sistema DEBE incluir Docker Compose listo para levantar PostgreSQL con extensión PgVector.
 - **RF-03**: El proyecto DEBE compilar y ejecutar con `./mvnw spring-boot:run` sin errores de dependencias.
 - **RF-04**: Se DEBEN definir paquetes y clases “placeholder” por capa según `AGENTS.md` para guiar implementaciones futuras.
@@ -43,14 +40,12 @@ Preparar el entorno de desarrollo y el esqueleto técnico mínimo para habilitar
 
 ### Logs
 - Log INFO en arranque indicando perfil activo y puerto.
-- Log de `/api/health` en nivel INFO al ser llamado (una línea).
 
 ### Seguridad
 - Sin autenticación en esta fase; limitar a entorno local con perfiles y CORS opcionalmente abierto para dev.
 - Validaciones básicas de configuración (fail-fast si faltan variables requeridas de DB).
 
 ### Tests
-- Cobertura mínima: 1 prueba de integración para `/api/health`.
 - Permitir ejecución de `./mvnw test` en < 30s en local.
 
 ### Escalabilidad
@@ -61,14 +56,11 @@ Preparar el entorno de desarrollo y el esqueleto técnico mínimo para habilitar
 ## 6. Flujo Técnico
 1) Arranque de Spring Boot con perfil `dev`.
 2) Carga de propiedades de conexión a PostgreSQL/PgVector desde `application-dev.yml`.
-3) Inicialización de beans mínimos (controller/service stub de health).
-4) Respuesta HTTP 200 en `/api/health` con payload simple `{status: "UP"}`.
 5) Docker Compose levanta PostgreSQL con extensión PgVector; la app puede conectarse, aunque no ejecuta consultas aún.
 
 ---
 
 ## 7. Endpoints (si aplica)
-- `GET /api/health`
   - **Response**: `200 OK`, body `{ "status": "UP", "timestamp": "<ISO-8601>" }`
   - **Errores**: `503` si no arranca contexto (Spring actuará con error de arranque; fuera de scope implementar checks externos).
 
@@ -84,7 +76,6 @@ No se crean entidades aún. Se define solo configuración de datasource hacia Po
   - Comportamiento: la app debe fallar rápido al iniciar si no puede conectarse (fail-fast), registrando el error en logs.
 - **CL-02: Falta variable de entorno obligatoria (DB URL)**  
   - Comportamiento: Spring debe impedir el arranque y registrar configuración faltante.
-- **CL-03: Llamada a `/api/health` sin DB**  
   - Comportamiento: si la app arrancó sin DB (perfil sin datasource), debe responder `UP` sólo para contexto de app; los checks de componentes se añaden en fases siguientes.
 
 ---
@@ -97,8 +88,6 @@ No se crean entidades aún. Se define solo configuración de datasource hacia Po
 
 ### Módulos Internos Afectados
 - `config`: propiedades de datasource, profiles.
-- `controller/impl`: `HealthControllerImpl` placeholder.
-- `service/impl`: `HealthServiceImpl` básico.
 
 ### Variables de Entorno
 ```env
@@ -123,15 +112,12 @@ SPRING_AI_OLLAMA_BASE_URL=http://localhost:11434   # placeholder
 
 ### Decisiones de Diseño Críticas
 - Usar perfil `dev` con datasource real para validar conexión desde el inicio.
-- Exponer `/api/health` como primer contrato para smoke tests.
 
 ---
 
 ## 12. KPIs de Éxito
 - [ ] Aplicación arranca en < 30s con `./mvnw spring-boot:run`.
-- [ ] `GET /api/health` responde `200 OK` y payload esperado.
 - [ ] Docker Compose levanta PostgreSQL + PgVector sin errores.
-- [ ] `./mvnw test` pasa con al menos una prueba para health.
 
 ---
 
@@ -140,4 +126,3 @@ SPRING_AI_OLLAMA_BASE_URL=http://localhost:11434   # placeholder
 - [ ] Se han identificado casos límite clave (DB caída, config faltante).
 - [ ] Endpoint documentado con ejemplo de response.
 - [ ] Dependencias externas documentadas con variables de entorno.
-- [ ] Hay KPIs medibles (arranque, health, tests, DB up).

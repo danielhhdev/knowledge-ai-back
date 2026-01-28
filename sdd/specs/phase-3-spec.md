@@ -1,7 +1,6 @@
 # SPEC - Fase 3 / Motor Generativo RAG
 
 ## 1. Contexto Heredado
-- **Funcionalidades existentes**: Health check operativo; ingesta via `/api/ingest` con chunking y embeddings en PgVector; retrieval en `/api/v1/query` que devuelve pasajes ordenados usando `Retriever`/`VectorStoreRetriever` de Spring AI.
 - **Modulos reutilizables**: `DocumentRepository`, `VectorStoreRepository`, `TextChunker`, `DocumentParser`, `QueryService` (retrieval), `QueryMapper`, configuracion de Spring AI/Ollama y PgVector, DTOs `QueryRequest`/`QueryResponse`.
 - **Modelos de datos previos**: Tablas `documents`, `chunks` y almacenamiento vectorial gestionado por Spring AI con metadata (documentId, chunkIndex, source, title, tags). Dominio `QueryResult` y value object de pasajes recuperados.
 - **Estado del proyecto**: Fases 0, 1 y 2 completadas; ya se puede consultar y obtener contexto pero aun no se genera respuesta natural con LLM.
