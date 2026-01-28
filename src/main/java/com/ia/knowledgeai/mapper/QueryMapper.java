@@ -90,7 +90,7 @@ public class QueryMapper {
 			String source = parseString(metadata.get("source"));
 			List<String> tags = parseTags(metadata.get("tags"));
 			double score = parseDouble(metadata.get("score"), metadata.get("distance"));
-			String snippet = parseSnippet(metadata);
+			String snippet = parseSnippet(document);
 
 			sources.add(new Source(documentId, title, chunkIndex, snippet, score, source, tags));
 		}
@@ -118,7 +118,7 @@ public class QueryMapper {
 			Map<String, Object> metadata = document.getMetadata();
 			UUID documentId = parseUuid(metadata.get("documentId"));
 			int chunkIndex = parseInt(metadata.get("chunkIndex"));
-			String snippet = parseSnippet(metadata);
+			String snippet = parseSnippet(document);
 			contextSnippets.add(new ContextSnippet(documentId, chunkIndex, snippet));
 		}
 		return contextSnippets;
@@ -187,11 +187,19 @@ public class QueryMapper {
 		return 0.0;
 	}
 
-	private String parseSnippet(Map<String, Object> metadata) {
+	private String parseSnippet(Document document) {
+		Map<String, Object> metadata = document.getMetadata();
 		String snippet = parseString(metadata.get("content"));
 		if (!StringUtils.hasText(snippet)) {
 			snippet = parseString(metadata.get("text"));
 		}
-		return snippet != null ? snippet : "";
+		if (!StringUtils.hasText(snippet)) {
+			snippet = document.getText();
+		}
+		if (snippet == null) {
+			return "";
+		}
+		int maxLength = 500;
+		return snippet.length() <= maxLength ? snippet : snippet.substring(0, maxLength);
 	}
 }
