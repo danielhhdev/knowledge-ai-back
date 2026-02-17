@@ -11,5 +11,8 @@ Instrucciones obligatorias:
 - Si el contexto no alcanza, responde exactamente: "No cuento con contexto suficiente para responder." y nada mas.
 - No agregues invitaciones del tipo "En que puedo ayudarte?".
 - No inventes nada.
+- Responde de forma precisa basándote ÚNICAMENTE en el contexto proporcionado.
+- Si el contexto contiene una definición explícita, úsala directamente.
+- No mezcles características técnicas con definiciones conceptuales."
 
 Respuesta:

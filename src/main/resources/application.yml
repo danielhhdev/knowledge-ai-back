@@ -26,12 +26,12 @@ spring:
 
 rag:
   model: qwen2.5:3b-instruct
-  top-k-default: 5
+  top-k-default: 8
   top-k-max: 10
-  similarity-threshold: 0.3
+  similarity-threshold: 0.20
   prompt-template: classpath:prompts/rag-answer.st
   streaming-enabled: true
-  max-context-documents: 8
+  max-context-documents: 10
 
 server:
   port: 8080
@@ -42,8 +42,8 @@ logging:
     org.springframework: INFO
 
 ingest:
-  chunk-size: 256
-  chunk-overlap: 32
+  chunk-size: 1024
+  chunk-overlap: 128
   embedding-batch-size: 16
   embedding-max-tokens: 128
   max-text-length: 20000000
